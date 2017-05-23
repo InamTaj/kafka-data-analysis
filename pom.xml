@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>inam.taj</groupId>
-    <artifactId>kafka-test</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <artifactId>kafka-data-analysis</artifactId>
+    <version>1.0</version>
 
     <dependencies>
         <dependency>
@@ -75,7 +75,7 @@
 
                     <!-- (optional) name for binary executable, if not set will just -->
                     <!-- make the regular jar artifact executable -->
-                    <programFile>kafka-test</programFile>
+                    <programFile>kafka-data-analysis</programFile>
                 </configuration>
 
                 <executions>
