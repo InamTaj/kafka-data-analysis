@@ -1,4 +1,4 @@
-package inam.java.models;
+package inam.models;
 
 import java.util.Arrays;
 

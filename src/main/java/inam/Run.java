@@ -1,4 +1,4 @@
-package inam.java;
+package inam;
 
 import java.io.IOException;
 

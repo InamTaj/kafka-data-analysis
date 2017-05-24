@@ -1,7 +1,7 @@
-package inam.java;
+package inam;
 
 import com.google.common.io.Resources;
-import inam.java.models.SensorInput;
+import inam.models.SensorInput;
 import inam.utils.ModelUtils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;

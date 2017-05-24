@@ -3,11 +3,10 @@ package inam.utils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import inam.java.models.SensorInput;
-import inam.java.models.SensorOutput;
+import inam.models.SensorInput;
+import inam.models.SensorOutput;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 

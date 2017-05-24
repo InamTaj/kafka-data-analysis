@@ -47,7 +47,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>inam.java.Run</mainClass>
+                            <mainClass>inam.Run</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

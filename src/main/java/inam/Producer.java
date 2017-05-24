@@ -1,7 +1,6 @@
-package inam.java;
+package inam;
 
 import com.google.common.io.Resources;
-import inam.java.models.SensorInput;
 import inam.utils.ModelUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -16,7 +15,7 @@ public class Producer {
 	public static void main(String... args) throws IOException {
 		org.apache.kafka.clients.producer.Producer<String, String> producer = null;
 		ProducerRecord<String, String> record = null;
-		String mockData = "MOCK_DATA1.json";
+		String mockData = "MOCK_DATA.json";
 		String propsFile = "producer.props";
 		String topicName = "inamTopic";
 
