@@ -1,6 +1,7 @@
 package inam;
 
 import com.google.common.io.Resources;
+import inam.models.SensorInput;
 import inam.utils.ModelUtils;
 import inam.utils.Utils;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -27,11 +28,11 @@ public class Producer {
 			String line;
 			while ((line = br.readLine()) != null) {
 				// process the line
-				String modelAsString = ModelUtils.parseStringToSensorInputModel(line, ModelUtils.MessageType.OUTGOING).toString();
-                record = new ProducerRecord<>(Utils.TOPIC_ONE, modelAsString);
+				SensorInput sensorInput = ModelUtils.convertStringReadFromFileToSensorInputModel(line);
+                record = new ProducerRecord<>(Utils.TOPIC_ONE, sensorInput.toString());
                 producer.send(record);
                 // console output
-				System.out.println(modelAsString);
+				System.out.println("wrote to " + Utils.TOPIC_ONE + ": " + sensorInput.toString());
 			}
 		} finally {
 			producer.close();

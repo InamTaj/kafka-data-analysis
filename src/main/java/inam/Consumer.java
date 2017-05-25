@@ -59,12 +59,9 @@ public class Consumer {
 			for (ConsumerRecord<String, String> record : records) {
 				// process records
 				// step 1: read data from topic
-				sensorInput = ModelUtils.parseStringToSensorInputModel(
-						record.value().toString(),
-						ModelUtils.MessageType.INCOMING
-				);
+				sensorInput = ModelUtils.convertStringReadFromTopicToSensorInputModel(record.value());
 				// console output
-				System.out.println(sensorInput);
+				System.out.println("read from topic " + Utils.TOPIC_ONE + ": " +sensorInput);
 
 				// step 2: transform it to SensorOutputModel
 				sensorOutput = ModelUtils.parseSensorInputToSensorOutput(sensorInput);

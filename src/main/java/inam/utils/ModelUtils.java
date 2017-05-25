@@ -11,24 +11,24 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 public class ModelUtils {
-	public enum MessageType {INCOMING, OUTGOING}
-
-	public static SensorInput parseStringToSensorInputModel(String line, MessageType messageType) {
+	public static SensorInput convertStringReadFromFileToSensorInputModel(String line) {
 		Gson gson = new Gson();
 		JsonObject jsonObj = new JsonParser().parse(line).getAsJsonObject();
-		int[] v = null;
-		int[] i = null;
-		switch(messageType) {
-			case OUTGOING:
-				v = gson.fromJson(jsonObj.get("v").getAsString(), int[].class);
-				i = gson.fromJson(jsonObj.get("i").getAsString(), int[].class);
-				break;
-			case INCOMING:
-				v = gson.fromJson(jsonObj.get("v"), int[].class);
-				i = gson.fromJson(jsonObj.get("i"), int[].class);
-				break;
-		}
+		int[] v = gson.fromJson(jsonObj.get("v").getAsString(), int[].class);;
+		int[] i = gson.fromJson(jsonObj.get("i").getAsString(), int[].class);
+		return new SensorInput(
+				jsonObj.get("id").getAsInt(),
+				jsonObj.get("ts").getAsLong(),
+				jsonObj.get("t").getAsInt()
+				,v, i
+		);
+	}
 
+	public static SensorInput convertStringReadFromTopicToSensorInputModel(String line) {
+		Gson gson = new Gson();
+		JsonObject jsonObj = new JsonParser().parse(line).getAsJsonObject();
+		int[] v = gson.fromJson(jsonObj.get("v"), int[].class);;
+		int[] i = gson.fromJson(jsonObj.get("i"), int[].class);
 		return new SensorInput(
 				jsonObj.get("id").getAsInt(),
 				jsonObj.get("ts").getAsLong(),
