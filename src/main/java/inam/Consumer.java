@@ -32,7 +32,7 @@ public class Consumer {
 					readFromTopic1ViaConsumerRecordsAndTransformData();
 					break;
 				case "--sensor-cost":
-					System.out.println("costing it...");
+					calculateSensorRunningCostFromTopic2();
 					break;
 				default:
 					printInvalidArgsError();
@@ -40,7 +40,7 @@ public class Consumer {
 		}
 	}
 
-	public static void readFromTopic1ViaConsumerRecordsAndTransformData() throws IOException {
+	private static void readFromTopic1ViaConsumerRecordsAndTransformData() throws IOException {
 		KafkaConsumer<String, String> consumer;
 		String propsFile = "consumer.props";
 
@@ -106,7 +106,7 @@ public class Consumer {
 		}
 	}
 
-	public static void readFromTopic1ViaStreamAndTransformData() throws IOException {
+	private static void readFromTopic1ViaStreamAndTransformData() throws IOException {
 		String propsFile = "consumer.props";
 		String topicName = "inamTopic";
 		String outputTopicName = "inamOutputTopic";
@@ -126,6 +126,11 @@ public class Consumer {
 			streams.cleanUp();
 			streams.start();
 		}
+	}
+
+	private static void calculateSensorRunningCostFromTopic2() {
+		// TODO
+		// step 1:
 	}
 
 	private static void printInvalidArgsError() {

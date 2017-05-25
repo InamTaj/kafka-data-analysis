@@ -61,7 +61,7 @@ public class ModelUtils {
 		// calculate & set power values
 		powerVals = new float[inputCurrents.length];
 		for (int j=0; j<inputVolts.length; j++) {
-			powerVals[j] = (inputVolts[j] * inputCurrents[j]) / 1000;
+			powerVals[j] = (inputVolts[j] * outputCurrents[j]) / 1000;
 		}
 		output.setPower(powerVals);
 
