@@ -1,4 +1,4 @@
-package inam.producers;
+package inam.singletons;
 
 import com.google.common.io.Resources;
 import inam.utils.Utils;
@@ -9,10 +9,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class SecondProducer {
+public class SecondProducerSingleton {
 	private static Producer<String, String> instance = null;
 
-	private SecondProducer() {}
+	private SecondProducerSingleton() {}
 
 	public static Producer getInstance() {
 		if (instance ==null) {

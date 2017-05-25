@@ -3,7 +3,8 @@ package inam;
 import com.google.common.io.Resources;
 import inam.models.SensorInput;
 import inam.models.SensorOutput;
-import inam.producers.SecondProducer;
+import inam.singletons.FileWriterSingleton;
+import inam.singletons.SecondProducerSingleton;
 import inam.utils.ModelUtils;
 import inam.utils.Utils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -14,6 +15,7 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -69,8 +71,9 @@ public class Consumer {
 				// step 3: write SensorOutputModel to 2nd kafka topic
 				writeDataToSecondKafkaTopic(sensorOutput);
 
-				// step 4: TODO: write SensorOutputModel to a physical file
-
+				// step 4: write SensorOutputModel to a physical file
+				writeOutputModelToFile(sensorOutput);
+				System.out.println("----------- ----------- -----------");
 			}
 		}
 	}
@@ -79,7 +82,7 @@ public class Consumer {
 		System.out.print("Writing transformed data to second topic: " + Utils.TOPIC_TWO);
 
 		ProducerRecord<String, String> record = new ProducerRecord<>(Utils.TOPIC_TWO, sensorOutput.toString());
-		org.apache.kafka.clients.producer.Producer<String, String> producer = SecondProducer.getInstance();
+		org.apache.kafka.clients.producer.Producer<String, String> producer = SecondProducerSingleton.getInstance();
 		producer.send(record);
 
 		System.out.println("......done");
@@ -87,7 +90,20 @@ public class Consumer {
 
 	private static void writeOutputModelToFile(SensorOutput sensorOutput) {
 		System.out.print("Writing transformed data to file..");
-		System.out.println("......done");
+		BufferedWriter bufferedWriter = null;
+		try {
+			bufferedWriter = FileWriterSingleton.getInstance();
+			bufferedWriter.write(sensorOutput.toString());
+			bufferedWriter.newLine();
+			System.out.println("......done");
+		}
+		catch(IOException ex) {
+			System.out.println("Exception occurred while writing transformed data to file...");
+		}
+		finally {
+			try {bufferedWriter.close();}
+			catch (IOException ex) {}
+		}
 	}
 
 	public static void readFromTopic1ViaStreamAndTransformData() throws IOException {

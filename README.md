@@ -40,5 +40,9 @@ A messaging application that uses Apache Kafka to ingest, process, republish and
 #### How-to-run
 ```bash
 $ mvn clean package
-$ target/kafka-data-analysis <producer OR consumer>
+$ target/kafka-data-analysis producer
+                                OR
+$ target/kafka-data-analysis consumer --transform-data
+                                OR
+$ target/kafka-data-analysis consumer --sensor-cost
 ```
