@@ -16,7 +16,7 @@ public class SecondProducerSingleton {
 
 	public static Producer getInstance() {
 		if (instance ==null) {
-			try (InputStream props = Resources.getResource(Utils.propsFileForProducer).openStream()) {
+			try (InputStream props = Resources.getResource(Utils.producerProps).openStream()) {
 				Properties properties = new Properties();
 				properties.load(props);
 				instance = new KafkaProducer<>(properties);

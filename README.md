@@ -32,9 +32,16 @@ A messaging application that uses Apache Kafka to ingest, process, republish and
 + `resources/producer.props` = Properties files for a Kafka Producer
 + `models/SensorInput.java` = A POJO representing incoming JSON data.
 + `models/SensorOutput.java` = A POJO representing formatted JSON data ready for output.
++ `models/SensorDataClass.java` = A POJO representing final computed sensor data for output.
++ `singletons/SecondProducer.java` = A singleton that returns a new producer sending transformed JSON objects to Topic #2.
++ `singletons/SecondConsumer.java` = A singleton that returns a new consumer listening to Topic #2, getting it's data and processing sensor data from it.
++ `singletons/FileWriterSingleton.java` = A singleton that returns a BufferedWriter stream object to write on file.
 + `utils/ModelUtils.java` = A utility class that contains common functions that are used in Consumer or Producer classes.
++ `utils/Utils.java` = A utility class that contains common properties to be used across the application.
 + `pom.xml` = Maven project's pom file representing project's lifecycle. See How-to-run section for more details.
 + `MOCK_DATA.json` = This JSON file contains mock data from multiple sensor devices.
++ `TRANSFORMED_DATA_FILE.json` = This JSON file on classpath will contain formattted JSON data.
++ `FINAL_COST_PER_HOUR.json` = This JSON file on classpath will contain final running cost for each sensor, i.e., objects of `SensorDataClass`.
 
 
 #### How-to-run

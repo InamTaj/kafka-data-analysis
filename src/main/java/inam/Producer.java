@@ -18,7 +18,7 @@ public class Producer {
 		org.apache.kafka.clients.producer.Producer<String, String> producer = null;
 		ProducerRecord<String, String> record = null;
 
-		try (InputStream props = Resources.getResource(Utils.propsFileForProducer).openStream()) {
+		try (InputStream props = Resources.getResource(Utils.producerProps).openStream()) {
 			Properties properties = new Properties();
 			properties.load(props);
 			producer = new KafkaProducer<>(properties);

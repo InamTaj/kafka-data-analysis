@@ -1,9 +1,11 @@
 package inam;
 
 import com.google.common.io.Resources;
+import inam.models.SensorDataClass;
 import inam.models.SensorInput;
 import inam.models.SensorOutput;
 import inam.singletons.FileWriterSingleton;
+import inam.singletons.SecondConsumerSingleton;
 import inam.singletons.SecondProducerSingleton;
 import inam.utils.ModelUtils;
 import inam.utils.Utils;
@@ -19,7 +21,9 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Properties;
+import java.util.Scanner;
 
 public class Consumer {
 	public static void main(String[] args) throws IOException {
@@ -42,22 +46,21 @@ public class Consumer {
 
 	private static void readFromTopic1ViaConsumerRecordsAndTransformData() throws IOException {
 		KafkaConsumer<String, String> consumer;
-		String propsFile = "consumer.props";
 
-		try (InputStream props = Resources.getResource(propsFile).openStream()) {
+		try (InputStream props = Resources.getResource(Utils.consumerProps).openStream()) {
 			Properties properties = new Properties();
 			properties.load(props);
 			consumer = new KafkaConsumer<>(properties);
 		}
 		consumer.subscribe(Arrays.asList(Utils.TOPIC_ONE));
-		int timeouts = 200;
+
 		// variables for processing
 		SensorInput sensorInput;
 		SensorOutput sensorOutput = null;
 
 		while (true) {
 			// read records with a short timeout.
-			ConsumerRecords<String, String> records = consumer.poll(timeouts);
+			ConsumerRecords<String, String> records = consumer.poll(200);
 			for (ConsumerRecord<String, String> record : records) {
 				// process records
 				// step 1: read data from topic
@@ -73,7 +76,7 @@ public class Consumer {
 
 				// step 4: write SensorOutputModel to a physical file
 				writeOutputModelToFile(sensorOutput);
-				System.out.println("----------- ----------- -----------");
+				System.out.println("----------- ----------- ----------- ----------- ----------- -----------");
 			}
 		}
 	}
@@ -92,7 +95,7 @@ public class Consumer {
 		System.out.print("Writing transformed data to file..");
 		BufferedWriter bufferedWriter = null;
 		try {
-			bufferedWriter = FileWriterSingleton.getInstance();
+			bufferedWriter = FileWriterSingleton.getInstance(Utils.TRANSFORMED_DATA_FILE);
 			bufferedWriter.write(sensorOutput.toString());
 			bufferedWriter.newLine();
 			System.out.println("......done");
@@ -129,8 +132,96 @@ public class Consumer {
 	}
 
 	private static void calculateSensorRunningCostFromTopic2() {
-		// TODO
-		// step 1:
+		/**
+		 * Strategy
+		 * Consume: Read from Topic line by line.
+		 * For each line, append an entry into HashMap for each sensor's key.
+		 * In value of key, populate pojo by updating it's power values and time values
+		 */
+		KafkaConsumer<String, String> consumer = SecondConsumerSingleton.getInstance();
+		final HashMap<Integer, SensorDataClass> mapOfSensors = new HashMap<>();
+		SensorOutput sensorOutput = null;
+		SensorDataClass pojo = null;
+		String shouldContinue = null;
+		do {
+
+			// read records with a short timeout.
+			ConsumerRecords<String, String> records = consumer.poll(200);
+			for (ConsumerRecord<String, String> record : records) {
+				sensorOutput = ModelUtils.convertStringReadFromTopicToSensorOutputModel(record.value());
+				System.out.println("read from topic #2: " + sensorOutput);
+
+				int sensorId = sensorOutput.getId();
+
+				// search pojo against ID of sensor in the MAP
+				pojo = mapOfSensors.get(sensorId);
+
+				if (pojo == null) {
+					pojo = new SensorDataClass(sensorId);
+				}
+
+				// calculate sum of power
+				float[] previousPower = pojo.getPower();
+				float[] currentPower = sensorOutput.getPower();
+				float[] newPower = new float[3];
+				for (int i = 0; i < previousPower.length; i++) {
+					newPower[i] = previousPower[i] + currentPower[i];
+				}
+				pojo.setPower(newPower);        // set new power vaues
+				System.out.println("calculating new power values......done");
+
+				// TODO
+				// calculate timestamp values
+				String currentTime = sensorOutput.getTime();
+				String previousLowTime = pojo.getTimeLowest();
+				String previousHighTime = pojo.getTimeHighest();
+
+				// if newTime is LOWEST
+				if (previousLowTime.length() <= currentTime.length()) {
+					pojo.setTimeLowest(currentTime);
+				}
+				// if newTime is HIGHEST
+				else if (previousHighTime.length() <= currentTime.length()) {
+					pojo.setTimeHighest(currentTime);
+				}
+
+				// replacing pojo with new values
+				System.out.println("New values of SensorData POJO: " + pojo);
+				mapOfSensors.put(Integer.valueOf(sensorId), pojo);
+				System.out.println("----------- ----------- ----------- ----------- ----------- -----------");
+			}
+
+			mapOfSensors.forEach((integer, sensorData) -> {
+				// perform final calculations on mapOfSensors
+				// calculations:
+				//              1- get total running time for sensor
+				//              2- get cost per hour
+				// write final sensorDataObjects from mapOfSensors on file
+				writeSensorDataToClass(sensorData);
+			});
+
+			System.out.println("\n\n>>> Should continue listening for next records? (y/n) (yes/no)");
+			shouldContinue = new Scanner(System.in).next();
+		}
+		while (shouldContinue.equalsIgnoreCase("y") || shouldContinue.equalsIgnoreCase("yes"));
+	}
+
+	private static void writeSensorDataToClass(SensorDataClass sensorData) {
+		System.out.print("Writing computed sensor data to file..");
+		BufferedWriter bufferedWriter = null;
+		try {
+			bufferedWriter = FileWriterSingleton.getInstance(Utils.FINAL_COST_PER_HOUR);
+			bufferedWriter.write(sensorData.toString());
+			bufferedWriter.newLine();
+			System.out.println("......done");
+		}
+		catch(IOException ex) {
+			System.out.println("Exception occurred while writing sensor data to file...");
+		}
+		finally {
+			try {bufferedWriter.close();}
+			catch (IOException ex) {}
+		}
 	}
 
 	private static void printInvalidArgsError() {

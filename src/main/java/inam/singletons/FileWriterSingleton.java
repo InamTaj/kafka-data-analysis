@@ -9,8 +9,8 @@ public class FileWriterSingleton {
 
 	private FileWriterSingleton() {}
 
-	public static BufferedWriter getInstance() throws IOException{
-		instance = new BufferedWriter(new FileWriter(Utils.TRANSFORMED_DATA_FILE, true));
+	public static BufferedWriter getInstance(String fileName) throws IOException{
+		instance = new BufferedWriter(new FileWriter(fileName, true));
 		return instance;
 	}
 }
