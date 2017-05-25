@@ -2,10 +2,14 @@ package inam;
 
 import com.google.common.io.Resources;
 import inam.models.SensorInput;
+import inam.models.SensorOutput;
+import inam.producers.SecondProducer;
 import inam.utils.ModelUtils;
+import inam.utils.Utils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KStreamBuilder;
@@ -37,28 +41,56 @@ public class Consumer {
 	public static void readFromTopic1ViaConsumerRecordsAndTransformData() throws IOException {
 		KafkaConsumer<String, String> consumer;
 		String propsFile = "consumer.props";
-		String topicName = "inamTopic";
 
 		try (InputStream props = Resources.getResource(propsFile).openStream()) {
 			Properties properties = new Properties();
 			properties.load(props);
 			consumer = new KafkaConsumer<>(properties);
 		}
-		consumer.subscribe(Arrays.asList(topicName));
+		consumer.subscribe(Arrays.asList(Utils.TOPIC_ONE));
 		int timeouts = 200;
+		// variables for processing
+		SensorInput sensorInput;
+		SensorOutput sensorOutput = null;
+
 		while (true) {
 			// read records with a short timeout.
 			ConsumerRecords<String, String> records = consumer.poll(timeouts);
 			for (ConsumerRecord<String, String> record : records) {
-				// process record
-				SensorInput sensorInput = ModelUtils.parseStringToSensorInputModel(
+				// process records
+				// step 1: read data from topic
+				sensorInput = ModelUtils.parseStringToSensorInputModel(
 						record.value().toString(),
 						ModelUtils.MessageType.INCOMING
 				);
 				// console output
 				System.out.println(sensorInput);
+
+				// step 2: transform it to SensorOutputModel
+				sensorOutput = ModelUtils.parseSensorInputToSensorOutput(sensorInput);
+
+				// step 3: write SensorOutputModel to 2nd kafka topic
+				writeDataToSecondKafkaTopic(sensorOutput);
+
+				// step 4: TODO: write SensorOutputModel to a physical file
+
 			}
 		}
+	}
+
+	private static void writeDataToSecondKafkaTopic(SensorOutput sensorOutput) {
+		System.out.print("Writing transformed data to second topic: " + Utils.TOPIC_TWO);
+
+		ProducerRecord<String, String> record = new ProducerRecord<>(Utils.TOPIC_TWO, sensorOutput.toString());
+		org.apache.kafka.clients.producer.Producer<String, String> producer = SecondProducer.getInstance();
+		producer.send(record);
+
+		System.out.println("......done");
+	}
+
+	private static void writeOutputModelToFile(SensorOutput sensorOutput) {
+		System.out.print("Writing transformed data to file..");
+		System.out.println("......done");
 	}
 
 	public static void readFromTopic1ViaStreamAndTransformData() throws IOException {
