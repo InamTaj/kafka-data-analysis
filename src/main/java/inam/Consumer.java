@@ -17,10 +17,24 @@ import java.util.Properties;
 
 public class Consumer {
 	public static void main(String[] args) throws IOException {
-		 consumerProcessing();
+		String operation = "";
+		try { operation = args[1]; }
+		catch (ArrayIndexOutOfBoundsException ex) { printInvalidArgsError(); }
+		if (!operation.isEmpty() || operation.length() > 0) {
+			switch (operation) {
+				case "--transform-data":
+					readFromTopic1ViaConsumerRecordsAndTransformData();
+					break;
+				case "--sensor-cost":
+					System.out.println("costing it...");
+					break;
+				default:
+					printInvalidArgsError();
+			}
+		}
 	}
 
-	public static void consumerProcessing() throws IOException {
+	public static void readFromTopic1ViaConsumerRecordsAndTransformData() throws IOException {
 		KafkaConsumer<String, String> consumer;
 		String propsFile = "consumer.props";
 		String topicName = "inamTopic";
@@ -47,7 +61,7 @@ public class Consumer {
 		}
 	}
 
-	public static void streamProcessing() throws IOException {
+	public static void readFromTopic1ViaStreamAndTransformData() throws IOException {
 		String propsFile = "consumer.props";
 		String topicName = "inamTopic";
 		String outputTopicName = "inamOutputTopic";
@@ -67,5 +81,10 @@ public class Consumer {
 			streams.cleanUp();
 			streams.start();
 		}
+	}
+
+	private static void printInvalidArgsError() {
+		System.err.println("Invalid argument after \"consumer\". Please type any of the following options: \nusage: consumer ");
+		System.out.println("\t[--transform-data]\n\t[--sensor-cost]");
 	}
 }
