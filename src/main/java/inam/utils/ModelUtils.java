@@ -37,6 +37,19 @@ public class ModelUtils {
 		);
 	}
 
+	public static SensorOutput convertStringReadFromTopicToSensorOutputModel(String line) {
+		Gson gson = new Gson();
+		JsonObject jsonObj = new JsonParser().parse(line).getAsJsonObject();
+		int[] v = gson.fromJson(jsonObj.get("v"), int[].class);;
+		int[] i = gson.fromJson(jsonObj.get("i"), int[].class);
+		return new SensorOutput(
+				jsonObj.get("id").getAsInt(),
+				jsonObj.get("ts").getAsLong(),
+				jsonObj.get("t").getAsInt()
+				,v, i
+		);
+	}
+
 	public static SensorOutput parseSensorInputToSensorOutput(SensorInput input) {
 		SensorOutput output = new SensorOutput();
 		int[] inputCurrents = input.getI(), inputVolts = input.getV();
