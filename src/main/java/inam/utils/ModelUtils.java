@@ -6,11 +6,6 @@ import com.google.gson.JsonParser;
 import inam.models.SensorInput;
 import inam.models.SensorOutput;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
 public class ModelUtils {
 	public static SensorInput convertStringReadFromFileToSensorInputModel(String line) {
 		Gson gson = new Gson();
@@ -44,14 +39,11 @@ public class ModelUtils {
 		int[] voltage = gson.fromJson(jsonObj.get("voltage"), int[].class);;
 		float[] current = gson.fromJson(jsonObj.get("current"), float[].class);
 		float[] power = gson.fromJson(jsonObj.get("power"), float[].class);
-		// setting time
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Utils.DATE_TIME_FORMAT);
-		LocalDateTime localDateTime = LocalDateTime.parse(jsonObj.get("time").getAsString(), formatter);
-		String time = localDateTime.format(formatter);
+		String parsedTime = TimeUtils.parseStringAndGetFormattedTimeAsString(jsonObj.get("time").getAsString());
 
 		return new SensorOutput(
 				jsonObj.get("id").getAsInt(),
-				time,
+				parsedTime,
 				jsonObj.get("temperature").getAsFloat(),
 				voltage,
 				current,
@@ -66,11 +58,7 @@ public class ModelUtils {
 
 		output.setId(input.getId());
 
-		// convert epoch to LocalDateTime
-		LocalDateTime dateTime = Instant.ofEpochMilli(input.getTs() * 1000).atZone(ZoneId.systemDefault()).toLocalDateTime();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Utils.DATE_TIME_FORMAT);
-		String time = dateTime.format(formatter);
-		output.setTime(time);
+		output.setTime(TimeUtils.getFormattedTimeFromEpoch(input.getTs()));
 
 		output.setTemperature(input.getT() / 100);
 		output.setVoltage(inputVolts);

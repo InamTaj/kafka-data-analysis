@@ -8,6 +8,7 @@ import inam.singletons.FileWriterSingleton;
 import inam.singletons.SecondConsumerSingleton;
 import inam.singletons.SecondProducerSingleton;
 import inam.utils.ModelUtils;
+import inam.utils.TimeUtils;
 import inam.utils.Utils;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -170,20 +171,13 @@ public class Consumer {
 				pojo.setPower(newPower);        // set new power vaues
 				System.out.println("calculating new power values......done");
 
-				// TODO
-				// calculate timestamp values
-				String currentTime = sensorOutput.getTime().toString();
+				// set lowest and highest times
+				String currentTime = sensorOutput.getTime();
 				String previousLowTime = pojo.getTimeLowest();
 				String previousHighTime = pojo.getTimeHighest();
 
-				// if newTime is LOWEST
-				if (previousLowTime.length() <= currentTime.length()) {
-					pojo.setTimeLowest(currentTime);
-				}
-				// if newTime is HIGHEST
-				else if (previousHighTime.length() <= currentTime.length()) {
-					pojo.setTimeHighest(currentTime);
-				}
+				pojo.setTimeLowest(TimeUtils.getSmallestDateTime(currentTime, previousLowTime));
+				pojo.setTimeHighest(TimeUtils.getLargestDateTime(currentTime, previousHighTime));
 
 				// replacing pojo with new values
 				System.out.println("New values of SensorData POJO: " + pojo);

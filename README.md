@@ -37,6 +37,7 @@ A messaging application that uses Apache Kafka to ingest, process, republish and
 + `singletons/SecondConsumer.java` = A singleton that returns a new consumer listening to Topic #2, getting it's data and processing sensor data from it.
 + `singletons/FileWriterSingleton.java` = A singleton that returns a BufferedWriter stream object to write on file.
 + `utils/ModelUtils.java` = A utility class that contains common functions that are used in Consumer or Producer classes.
++ `utils/TimeUtils.java` = A utility class with essentail date-time conversion and calculation facilities and used by various classes.
 + `utils/Utils.java` = A utility class that contains common properties to be used across the application.
 + `pom.xml` = Maven project's pom file representing project's lifecycle. See How-to-run section for more details.
 + `MOCK_DATA.json` = This JSON file contains mock data from multiple sensor devices.
