@@ -140,9 +140,9 @@ public class Consumer {
 		 */
 		KafkaConsumer<String, String> consumer = SecondConsumerSingleton.getInstance();
 		final HashMap<Integer, SensorDataClass> mapOfSensors = new HashMap<>();
-		SensorOutput sensorOutput = null;
-		SensorDataClass pojo = null;
-		String shouldContinue = null;
+		SensorOutput sensorOutput;
+		SensorDataClass pojo;
+		String shouldContinue;
 		do {
 
 			// read records with a short timeout.
@@ -172,7 +172,7 @@ public class Consumer {
 
 				// TODO
 				// calculate timestamp values
-				String currentTime = sensorOutput.getTime();
+				String currentTime = sensorOutput.getTime().toString();
 				String previousLowTime = pojo.getTimeLowest();
 				String previousHighTime = pojo.getTimeHighest();
 
