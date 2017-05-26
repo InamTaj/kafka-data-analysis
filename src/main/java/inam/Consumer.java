@@ -132,13 +132,26 @@ public class Consumer {
 		}
 	}
 
+	/**
+	 * STRATEGY
+	 *
+	 * Consume:
+	 *      + read from Topic line by line and parse it as Formatted Data POJO (SensorOutput)
+	 *
+	 * Process (Part 1):
+	 *      + for each SensorOutput record, create a DataClass object
+	 *      + DataClass object that will store following variables of SensorOutput:
+	 *          - sum of all powers
+	 *          - lowestTimeStamp and highestTimeStamp (will be used later to calculate total running time of sensor)
+	 *      + store this object in HashMap -> KEY = sensorId || VALUE = DataClass object
+	 *      + finally HashMap will contain a DataClass object for each sensorId with total power calculated and time values
+	 *
+	 * Process (Part 2):
+	 *      + process HashMap to calculate running Time for each sensor
+	 *      + calculate sensor running cost for each hour
+	 *      + write all of this data (sensorId, power, sensor-running-cost) in a new file
+	 */
 	private static void calculateSensorRunningCostFromTopic2() {
-		/**
-		 * Strategy
-		 * Consume: Read from Topic line by line.
-		 * For each line, append an entry into HashMap for each sensor's key.
-		 * In value of key, populate pojo by updating it's power values and time values
-		 */
 		KafkaConsumer<String, String> consumer = SecondConsumerSingleton.getInstance();
 		final HashMap<Integer, SensorDataClass> mapOfSensors = new HashMap<>();
 		SensorOutput sensorOutput;
@@ -175,7 +188,6 @@ public class Consumer {
 				String currentTime = sensorOutput.getTime();
 				String previousLowTime = pojo.getTimeLowest();
 				String previousHighTime = pojo.getTimeHighest();
-
 				pojo.setTimeLowest(TimeUtils.getSmallestDateTime(currentTime, previousLowTime));
 				pojo.setTimeHighest(TimeUtils.getLargestDateTime(currentTime, previousHighTime));
 
