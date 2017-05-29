@@ -12,10 +12,16 @@ A messaging application that uses Apache Kafka to ingest, process, republish and
          + [models](./src/main/java/inam/models)
            * [SensorInput.java](./src/main/java/inam/models/SensorInput.java)
            * [SensorOutput.java](./src/main/java/inam/models/SensorOutput.java)
+           * [SensorDataClass.java](./src/main/java/inam/models/SensorDataClass.java)
+         + [singletons](./src/main/java/inam/singletons)
+           * [FileWriterSingleton.java](./src/main/java/inam/utils/FileWriterSingleton.java)
+           * [SecondConsumerSingleton.java](./src/main/java/inam/utils/SecondConsumerSingleton.java)
+           * [SecondProducerSingleton.java](./src/main/java/inam/utils/SecondProducerSingleton.java)
          + [utils](./src/main/java/inam/utils)
              * [JsonDeserializer.java](./src/main/java/inam/utils/JsonDeserializer.java)
              * [JsonSerializer.java](./src/main/java/inam/utils/JsonSerializer.java)
              * [ModelUtils.java](./src/main/java/inam/utils/ModelUtils.java)
+             * [TimeUtils.java](./src/main/java/inam/utils/TimeUtils.java)
        - [resources](./src/main/resources)
            * [consumer.props](./src/main/resources/consumer.props)
            * [producer.props](./src/main/resources/producer.props)
@@ -46,7 +52,15 @@ A messaging application that uses Apache Kafka to ingest, process, republish and
 
 
 #### How-to-run
+Prerequisites:
+* Apache kafka
+* Maven 3.0+
+* JDK/JRE 1.8+
+* zookeper running
+* kafka server running
+
 ```bash
+$ cd kafka-data-analysis
 $ mvn clean package
 $ target/kafka-data-analysis producer
                                 OR
@@ -54,3 +68,9 @@ $ target/kafka-data-analysis consumer --transform-data
                                 OR
 $ target/kafka-data-analysis consumer --sensor-cost
 ```
+
+#### Notes
+- Each Producer and Consumer should be run in a separate Terminal. You can also use terminal multiplexers such as _byobou_.
+- The formula to calculate cost might be incorrect because the statement `(Sum (Total power for one hour)` seemed imbigous. Nontheless it is a minor change in the respective function.
+    + see function `getRunningCostPerHour()`
+- Streams were not used because the operations to be performed on data took a lot of time, and I couldn't find reasonable time to research on Kafka Streams' API documentation.
