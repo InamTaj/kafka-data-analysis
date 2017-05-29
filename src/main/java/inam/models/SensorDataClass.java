@@ -7,27 +7,14 @@ public class SensorDataClass {
 	private float[] power;
 	private String timeLowest;
 	private String timeHighest;
-	private String totalTimeRunning;
-	private long costPerHour;
-
-	public SensorDataClass() {
-		setPower(new float[3]);
-		setTimeLowest("");
-		setTimeHighest("");
-	}
+	private double totalRunningHours;
+	private double costPerHour;
 
 	public SensorDataClass(int id) {
 		this.id = id;
 		setPower(new float[3]);
 		setTimeLowest("");
 		setTimeHighest("");
-	}
-
-	public SensorDataClass(int id, float[] power, String timeLowest, String timeHighest) {
-		setId(id);
-		setPower(power);
-		setTimeLowest(timeLowest);
-		setTimeHighest(timeHighest);
 	}
 
 	public int getId() {
@@ -62,19 +49,19 @@ public class SensorDataClass {
 		this.timeHighest = timeHighest;
 	}
 
-	public String getTotalTimeRunning() {
-		return totalTimeRunning;
+	public double getTotalRunningHours() {
+		return totalRunningHours;
 	}
 
-	public void setTotalTimeRunning(String totalTimeRunning) {
-		this.totalTimeRunning = totalTimeRunning;
+	public void setTotalRunningHours(double totalRunningHours) {
+		this.totalRunningHours = totalRunningHours;
 	}
 
-	public long getCostPerHour() {
+	public double getCostPerHour() {
 		return costPerHour;
 	}
 
-	public void setCostPerHour(long costPerHour) {
+	public void setCostPerHour(double costPerHour) {
 		this.costPerHour = costPerHour;
 	}
 
@@ -83,7 +70,7 @@ public class SensorDataClass {
 		return "{" +
 				"id=" + id +
 				", power=" + Arrays.toString(power) +
-				", totalTimeRunning='" + totalTimeRunning + '\'' +
+				", totalRunningHours='" + totalRunningHours + '\'' +
 				", costPerHour=" + costPerHour +
 				", timeLowest='" + timeLowest + '\'' +
 				", timeHighest='" + timeHighest + '\'' +
