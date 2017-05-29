@@ -67,39 +67,33 @@ public class Consumer {
 				// step 1: read data from topic
 				sensorInput = ModelUtils.convertStringReadFromTopicToSensorInputModel(record.value());
 				// console output
-				System.out.println("read from topic " + Utils.TOPIC_ONE + ": " +sensorInput);
+				System.out.println("read from topic " + Utils.TOPIC_ONE + ": " + sensorInput);
 
 				// step 2: transform it to SensorOutputModel
 				sensorOutput = ModelUtils.parseSensorInputToSensorOutput(sensorInput);
 
+				System.out.println("writing transformed data: " + sensorOutput + " to file & topic: " + Utils.TOPIC_TWO);
 				// step 3: write SensorOutputModel to 2nd kafka topic
 				writeDataToSecondKafkaTopic(sensorOutput);
 
 				// step 4: write SensorOutputModel to a physical file
 				writeOutputModelToFile(sensorOutput);
-				System.out.println("----------- ----------- ----------- ----------- ----------- -----------");
 			}
 		}
 	}
 
 	private static void writeDataToSecondKafkaTopic(SensorOutput sensorOutput) {
-		System.out.print("Writing transformed data to second topic: " + Utils.TOPIC_TWO);
-
 		ProducerRecord<String, String> record = new ProducerRecord<>(Utils.TOPIC_TWO, sensorOutput.toString());
 		org.apache.kafka.clients.producer.Producer<String, String> producer = SecondProducerSingleton.getInstance();
 		producer.send(record);
-
-		System.out.println("......done");
 	}
 
 	private static void writeOutputModelToFile(SensorOutput sensorOutput) {
-		System.out.print("Writing transformed data to file..");
 		BufferedWriter bufferedWriter = null;
 		try {
 			bufferedWriter = FileWriterSingleton.getInstance(Utils.TRANSFORMED_DATA_FILE);
 			bufferedWriter.write(sensorOutput.toString());
 			bufferedWriter.newLine();
-			System.out.println("......done");
 		}
 		catch(IOException ex) {
 			System.out.println("Exception occurred while writing transformed data to file...");
@@ -107,28 +101,6 @@ public class Consumer {
 		finally {
 			try {bufferedWriter.close();}
 			catch (IOException ex) {}
-		}
-	}
-
-	private static void readFromTopic1ViaStreamAndTransformData() throws IOException {
-		String propsFile = "consumer.props";
-		String topicName = "inamTopic";
-		String outputTopicName = "inamOutputTopic";
-
-		try (InputStream props = Resources.getResource(propsFile).openStream()) {
-			Properties properties = new Properties();
-			properties.load(props);
-			final KStreamBuilder builder = new KStreamBuilder();
-			final KStream<String, String> textLines = builder.stream(topicName);
-
-			//        final KTable<String, String> wordCounts = textLines.;
-
-			textLines.to(outputTopicName);
-
-			final KafkaStreams streams = new KafkaStreams(builder, properties);
-
-			streams.cleanUp();
-			streams.start();
 		}
 	}
 
@@ -152,6 +124,7 @@ public class Consumer {
 	 *      + write all of this data (sensorId, power, sensor-running-cost) in a new file
 	 */
 	private static void calculateSensorRunningCostFromTopic2() {
+		TimeUtils timeUtils = new TimeUtils();
 		KafkaConsumer<String, String> consumer = SecondConsumerSingleton.getInstance();
 		final HashMap<Integer, SensorDataClass> mapOfSensors = new HashMap<>();
 		SensorOutput sensorOutput;
@@ -188,28 +161,42 @@ public class Consumer {
 				String currentTime = sensorOutput.getTime();
 				String previousLowTime = pojo.getTimeLowest();
 				String previousHighTime = pojo.getTimeHighest();
-				pojo.setTimeLowest(TimeUtils.getSmallestDateTime(currentTime, previousLowTime));
-				pojo.setTimeHighest(TimeUtils.getLargestDateTime(currentTime, previousHighTime));
+				pojo.setTimeLowest(timeUtils.getSmallestDateTime(currentTime, previousLowTime));
+				pojo.setTimeHighest(timeUtils.getLargestDateTime(currentTime, previousHighTime));
+				System.out.println("calculating new dateTime values......done");
 
 				// replacing pojo with new values
-				System.out.println("New values of SensorData POJO: " + pojo);
 				mapOfSensors.put(Integer.valueOf(sensorId), pojo);
-				System.out.println("----------- ----------- ----------- ----------- ----------- -----------");
 			}
 
 			mapOfSensors.forEach((integer, sensorData) -> {
 				// perform final calculations on mapOfSensors
-				// calculations:
-				//              1- get total running time for sensor
-				//              2- get cost per hour
-				// write final sensorDataObjects from mapOfSensors on file
+
+				// 1- get total running time for sensor
+				double hours = timeUtils.getTotalHoursBetweenTwoDateTimes(sensorData.getTimeLowest(), sensorData.getTimeHighest());
+				sensorData.setTotalRunningHours(hours);
+
+				// 2- get cost per hour
+				sensorData.setCostPerHour( getRunningCostPerHour(sensorData.getPower(), hours) );
+
+				// 3- write final sensorDataObjects from mapOfSensors on file
 				writeSensorDataToClass(sensorData);
+
+				System.out.println("final sensor-data with computed values: " + sensorData);
 			});
 
-			System.out.println("\n\n>>> Should continue listening for next records? (y/n) (yes/no)");
+			System.out.println("\n\n>>> Should I run again for all  (new + old) records? (y/n) (yes/no)");
 			shouldContinue = new Scanner(System.in).next();
 		}
 		while (shouldContinue.equalsIgnoreCase("y") || shouldContinue.equalsIgnoreCase("yes"));
+	}
+
+	private static double getRunningCostPerHour(float[] power, double hours) {
+		float totalPower = 0;
+		for(float i: power) {
+			totalPower += i;
+		}
+		return ((totalPower * hours) / 60) * 15;
 	}
 
 	private static void writeSensorDataToClass(SensorDataClass sensorData) {
