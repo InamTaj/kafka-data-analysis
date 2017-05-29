@@ -1,0 +1,6 @@
+.idea/
+src/.idea/src.iml
+target/
+*.iml
+FINAL_COST_PER_HOUR.json
+TRANSFORMED_DATA.json
