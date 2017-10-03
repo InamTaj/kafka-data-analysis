@@ -1,5 +1,10 @@
 # kafka-data-analysis
-A messaging application that uses Apache Kafka to ingest, process, republish and reprocess data.
+A demo of listen and transforming data in **real-time** at the scale of big-data. This application uses Apache Kafka to ingest, process, republish and reprocess data.
+
+## Problem Statement
+A detailed problem statement can be found [here](./kafka-problem-statement.pdf).
+
+____
 
 #### Project Structure
  * [src](./src)
@@ -28,6 +33,7 @@ A messaging application that uses Apache Kafka to ingest, process, republish and
  * [MOCK_DATA.json](./MOCK_DATA.json)
  * [pom.xml](./pom.xml)
  * [README.md](./README.md)
+ * [kafka-problem-statement.pdf](./kafka-problem-statement.pdf)
 
 
 #### Explanation
@@ -73,4 +79,3 @@ $ target/kafka-data-analysis consumer --sensor-cost
 - Each Producer and Consumer should be run in a separate Terminal. You can also use terminal multiplexers such as _byobou_.
 - The formula to calculate cost might be incorrect because the statement `(Sum (Total power for one hour)` seemed imbigous. Nontheless it is a minor change in the respective function.
     + see function `getRunningCostPerHour()`
-- Streams were not used because the operations to be performed on data took a lot of time, and I couldn't find reasonable time to research on Kafka Streams' API documentation.
